@@ -6,6 +6,12 @@ ${basename(__FILE__, ".php")} = function () {
             $username = $this->_request['username'];
             $email = $this->_request['email'];
             $password = $this->_request['password'];
+            if ($_SERVER['REMOTE_ADDR']!='122.165.70.136') {
+                $data = [
+                    "Status" => "Forbidden, Signup not allowed from this IP"
+                ];
+                $this->response($this->json($data), 403);
+            }
             try {
                 $newObj = new Signup($username, $password, $email);
                 $data = [

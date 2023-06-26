@@ -1,21 +1,14 @@
 <?php
 
-// include("../verify.php");
-
-//------------------including the notes framework-------------------------------------------------------------------------------
-require_once(realpath(dirname(__FILE__)) . "/Folder.class.php");
-//------------------End ofincluding the notes framework-------------------------------------------------------------------------------
-/**
- */
 //------------------including Php mail framework-------------------------------------------------------------------------------
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-require_once realpath(dirname(__FILE__)) . '/../../../../vendor/phpmailer/phpmailer/src/Exception.php';
-require_once realpath(dirname(__FILE__)) . '/../../../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require_once realpath(dirname(__FILE__)) . '/../../../../vendor/phpmailer/phpmailer/src/SMTP.php';
-require_once realpath(dirname(__FILE__)) . '/../../../../vendor/autoload.php';
+require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/Exception.php';
+require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/SMTP.php';
+require_once realpath(dirname(__FILE__)) . '/../../vendor/autoload.php';
 //------------------End of including Php mail framework-------------------------------------------------------------------------------
 class Signup
 {
@@ -59,23 +52,20 @@ class Signup
 
     public function signup()
     {
-        $query = "INSERT INTO `API` (`username`, `password`, `email_address`, `active`, `token`)
-                  VALUES ('$this->username', '$this->password', '$this->email', '0', '$this->token')";
-
         $email = $this->email;
         $token = $this->token;
-        $result = $this->db->query($query);
+        $result = $this->sendverificationEmail($email, $token);
         if ($result) {
-            $this->sendverificationEmail($email, $token);
-            $this->id = mysqli_insert_id($this->db);
-            //------------------creating the default folder-------------------------------------------------------------------------------
-            $folder = new Folder();
-            session_start();
-            $_SESSION['username'] = $this->username;
-            $folder->createNew("Default Folder");
-            //------------------End of creating the default folder-------------------------------------------------------------------------------
+            $query = "INSERT INTO `API` (`username`, `password`, `email_address`, `active`, `token`)
+                  VALUES ('$this->username', '$this->password', '$this->email', '0', '$this->token')";
+            $result = $this->db->query($query);
+            if ($result) {
+                $this->id = mysqli_insert_id($this->db);
+            } else {
+                throw new Exception("Unable to signup");
+            }
         } else {
-            throw new Exception("Unable to signup");
+            throw new Exception("Unable to send verification email");
         }
     }
 
@@ -104,37 +94,38 @@ class Signup
 
     private function sendverificationEmail($email, $token)
     {
-        $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../../config_files/api.json");
+        $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../env.json");
         $config = json_decode($config, true);
         $from_mail = $config["mail_ID"];
         $from_mail_key = $config["mail_key"];
         $mail = new PHPMailer(true);
 
         try {
-            $mail->SMTPDebug = SMTP::DEBUG_SERVER;
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            echo $from_mail . " " . $from_mail_key;
+            $mail->Username = $from_mail; // Your email address
+            $mail->Password = $from_mail_key; // Your email password
+            $mail->SMTPSecure = 'tls'; // Enable TLS encryption
+            $mail->Port = 587; // TCP port to connect to
 
-            $mail->Username = $from_mail;
-            $mail->Password = $from_mail_key;
+            // Email content
+            $mail->setFrom($from_mail, 'Praveen'); // Sender's email address and name
+            $mail->addAddress('mspraveenkumar77@gmail.com', 'Recipient Name'); // Recipient's email address and name
+            $mail->Subject = 'Test Email';
+            $mail->Body = 'This is a test email sent via SMTP.';
 
-            $mail->setFrom($from_mail, "M.S.Praveen Kumar");
-            $mail->addAddress($email, 'Test Name');
-            $mail->addReplyTo($from_mail, "M.S.Praveen Kumar");
+            // Send the email
+            if ($mail->send()) {
+                return true;
+            } else {
+                return false;
+            }
 
-            $mail->IsHTML(true);
-            $mail->Subject = "Verify Your Email";
-            //$mail->Body = 'You can see your Auth Token Here. Token : ' . $token;
-            $mail->Body = "<h2>Click<a href='http://apis.selfmade.one/api/verify?token=$token'> here </a>to verify you Email..</h2>";
-            $mail->Body = "<strong>Click<a href='http://apis.selfmade.one/api/verify?token=$token'> here </a>to verify you Email..</strong>";
-            $mail->SMTPDebug = false;
-            $mail->send();
-            //echo "Email message sent.";
+            echo 'Email sent successfully!';
         } catch (Exception $e) {
-            echo "Error in sending email. Mailer Error: {$mail->ErrorInfo}";
+            throw new Exception("Error in sending email. Mailer Error: {$mail->ErrorInfo}");
         }
     }
 

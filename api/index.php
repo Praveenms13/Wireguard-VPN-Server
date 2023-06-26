@@ -1,13 +1,10 @@
 <?php
-
 require_once("REST.api.php");
 require_once("libs/Database.class.php");
 require_once("libs/Signup.class.php");
 require_once("libs/User.class.php");
 require_once("libs/Auth.class.php");
 require_once("libs/OAuth.class.php");
-//internal server 500 error when i include this(user.class and auth.class)
-//only one simultaneous login na just delete all the previous sessions(Logout) and add new one
 class API extends REST
 {
     private $current_call;
@@ -28,7 +25,7 @@ class API extends REST
     public function auth()
     {
         if (isset(getallheaders()['Authorization'])) {
-            $token = explode(" ", getallheaders()['Authorization']) [1];
+            $token = explode(" ", getallheaders()['Authorization'])[1];
             $this->auth = new Auth($token);
         }
     }
@@ -52,8 +49,7 @@ class API extends REST
             "Error" => $e->getMessage(),
         ];
         $response_code = 400;
-        if ($e->getMessage() == (
-            "Notes Not Found" or
+        if ($e->getMessage() == ("Notes Not Found" or
             "Folder Not Found" or
             "Created at Not Found" or
             "Updated at Not Found" or
@@ -68,63 +64,30 @@ class API extends REST
         }
         $this->response($this->json($data), $response_code);
     }
-    /*
-         * Public method for access api.
-         * This method dynmically call the method based on the query string
-         *
-         */
     public function processApi()
     {
         //ALERT!!...   to prevent the sql injection here
-        $func = strtolower(trim(str_replace("/", "", $_REQUEST['method']))); // TODO: If api doesnt works remove / from the line 
+        $func = strtolower(trim(str_replace("", "", $_REQUEST['method']))); // TODO: If api doesnt works remove / from the line 
         if ((int)method_exists($this, $func) > 0) {
             $this->$func();
-        } else { 
-            //$this->response('', 400);   removed by me for testing
-            //below code added for anonymous function which is not in the class
-            if (isset($_GET['namespace'])) {//--------------------------------------------------------------------------------------------
-                $dir = __DIR__ . "/api_xtensions" . $_GET['namespace'];
-                $CheckMethod = scandir(__DIR__ . "/api_xtensions" . $_GET['namespace']);
-                $file = $dir . "/$func"  . '.php';
+        } else {
+            if (isset($_GET['namespace'])) {
+                $dir = $_SERVER['DOCUMENT_ROOT'] . '/api/api_xtensions/' . $_GET['namespace'];
+                $file = $dir . '/' . $func . '.php';
                 if (file_exists($file)) {
                     include $file;
-                    $func = explode("/", $func)[1];
                     $this->current_call = Closure::bind(${$func}, $this, get_class());
                     $this->$func();
+                } else {
+                    $this->response($this->json(['error' => 'method_not_found...']), 404);
                 }
-                // foreach ($CheckMethod as $r) {
-                //     if ($r == "." or $r == "..") {
-                //         //echo $r;
-                //         continue;
-                //     }
-                //     $basem = basename($r, ".php");
-                //     if ($basem == $func) {
-                //         include $dir . $r;
-                //         $this->current_call = Closure::bind(${$basem}, $this, get_class());
-                //         $this->$basem();
-                //     }
-                // }
-            } else {  //can also process without namespace
-                $data = [
-                    "Status" => "Method not allowed"
-                ];
-                $this->response($this->json($data), 404);
-            }//---------------------------------------------------------------------------------------------------------------------------------
-        } // If the method not exist with in this class, response would be "Page not found".
+            }
+        }
     }
 
 
     public function __call($method, $args)
     {
-        //echo "__Call is called for $method() \n" ;
-        // $CheckMethod = get_class_methods('API');
-        // foreach ($CheckMethod as $r) {
-        //     if ($r == $method) {
-        //         //echo "Method called : $method is presesnt as private function...\n";
-        //         return $this->$r();
-        //     }
-        // }
-
         if (is_callable($this->current_call)) {
             $this->current_call;
             return call_user_func_array($this->current_call, $args);
