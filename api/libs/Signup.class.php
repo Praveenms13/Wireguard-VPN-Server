@@ -1,15 +1,6 @@
 <?php
 
-//------------------including Php mail framework-------------------------------------------------------------------------------
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
-require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/Exception.php';
-require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/PHPMailer.php';
-require_once realpath(dirname(__FILE__)) . '/../../vendor/phpmailer/phpmailer/src/SMTP.php';
 require_once realpath(dirname(__FILE__)) . '/../../vendor/autoload.php';
-//------------------End of including Php mail framework-------------------------------------------------------------------------------
 class Signup
 {
     private $username;
@@ -29,7 +20,7 @@ class Signup
         $this->token = $this->gen_token();
         //--------------------------------------------------
         if ($this->userExists()) {
-            throw new Exception("Can't signup, user already exists");
+            throw new Exception("Can't signup, username already exists");
         } else {
             $this->signup();
         }
@@ -45,7 +36,7 @@ class Signup
         $result = $db->query($query);
         if ($result->num_rows > 0) {
             return true;
-        } else {
+        } else { 
             return false;
         }
     }
@@ -65,7 +56,7 @@ class Signup
                 throw new Exception("Unable to signup");
             }
         } else {
-            throw new Exception("Unable to send verification email");
+            throw new Exception("Unable to send verification email(Signup())");
         }
     }
 
@@ -94,39 +85,34 @@ class Signup
 
     private function sendverificationEmail($email, $token)
     {
-        $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../env.json");
-        $config = json_decode($config, true);
-        $from_mail = $config["mail_ID"];
-        $from_mail_key = $config["mail_key"];
-        $mail = new PHPMailer(true);
-
         try {
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            echo $from_mail . " " . $from_mail_key;
-            $mail->Username = $from_mail; // Your email address
-            $mail->Password = $from_mail_key; // Your email password
-            $mail->SMTPSecure = 'tls'; // Enable TLS encryption
-            $mail->Port = 587; // TCP port to connect to
-
-            // Email content
-            $mail->setFrom($from_mail, 'Praveen'); // Sender's email address and name
-            $mail->addAddress('mspraveenkumar77@gmail.com', 'Recipient Name'); // Recipient's email address and name
-            $mail->Subject = 'Test Email';
-            $mail->Body = 'This is a test email sent via SMTP.';
-
-            // Send the email
-            if ($mail->send()) {
+            $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../env.json");
+            $config = json_decode($config, true);
+            $sendgrid_api_key = $config['sendgrid_api_key'];
+            $email = new \SendGrid\Mail\Mail();
+            $email->setFrom("mspraveenkumar77@gmail.com", "Example User");
+            $email->setSubject("Sending with SendGrid is Fun");
+            $email->addTo("mspreetha12@gmail.com", "Example User");
+            $email->addContent("text/plain", "and easy to do anywhere, even with PHP");
+            $email->addContent(
+                "text/html",
+                "<strong>and easy to do anywhere, even with PHP</strong>"
+            );
+            $sendgrid = new \SendGrid($sendgrid_api_key);
+            $response = $sendgrid->send($email);
+            if ($response->statusCode() == 202) {
                 return true;
             } else {
                 return false;
             }
-
-            echo 'Email sent successfully!';
+            // print $response->statusCode() . "\n";
+            // print_r($response->headers());
+            // print $response->body() . "\n";
         } catch (Exception $e) {
-            throw new Exception("Error in sending email. Mailer Error: {$mail->ErrorInfo}");
+            throw new Exception("Unable to send verification email(verification())");
+            echo 'Caught exception: '. $e->getMessage() ."\n";
         }
+
     }
 
 
