@@ -6,6 +6,7 @@ require_once("libs/Signup.class.php");
 require_once("libs/User.class.php");
 require_once("libs/Auth.class.php");
 require_once("libs/OAuth.class.php");
+require_once("libs/wireguard.class.php");
 class API extends REST
 {
     private $current_call;
@@ -74,7 +75,7 @@ class API extends REST
             $this->$func();
         } else {
             if (isset($_GET['namespace'])) {
-                $dir = $_SERVER['DOCUMENT_ROOT'] . '/api/api_xtensions/' . $_GET['namespace'];
+                $dir = $_SERVER['DOCUMENT_ROOT'] . 'api/api_xtensions/' . $_GET['namespace'];
                 $file = $dir . '/' . $func . '.php';
                 if (file_exists($file)) {
                     include $file;
@@ -116,28 +117,6 @@ class API extends REST
         $this->response($data, 200);
     }
 
-    //if not of isset then give 400 request to client
-    // private function gen_hash()
-    // {
-    //     if (isset($this->_request['password'])) {
-    //         $password = $this->_request['password'];
-    //         $newObj = new Signup("", "$password", "");
-    //         $hash = $newObj->gen_pass_hash($password);
-    //         $data = [
-    //             "Hash Info" => password_get_info($hash),
-    //             "Hash" => $hash,
-    //             "Password" => $password,
-    //             "value" => password_verify("praveen", $hash)
-    //         ];
-    //         $this->response($this->json($data), 200);
-    //     } else {
-    //         $data = [
-    //             "Status" => "Server DisConnected"
-    //         ];
-    //         $this->response($this->json($data), 404);
-    //     }
-    // }
-
     private function verify()
     {
         include "verify.php";
@@ -160,7 +139,11 @@ class API extends REST
 }
 
 // Initiiate Library
-
+function stringStart($string, $startString)
+{
+    $len = strlen($startString);
+    return (substr($string, 0, $len) === $startString);
+}
 $api = new API();
 try {
     $api->auth();
