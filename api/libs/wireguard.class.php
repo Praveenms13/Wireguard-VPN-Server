@@ -16,11 +16,6 @@ class wireguard
         $this->device = $device;
     }
 
-    public function getPeers()
-    {
-    }
-
-
     public function addPeer($publicKey, $ip)
     {
         $publicKey = str_replace(' ', '', trim($publicKey));
@@ -67,5 +62,38 @@ class wireguard
             }
         }
         return $peer;
+    }
+
+    public function getPeers()
+    {
+        // TODO TO Make this with Regex
+        $cmd = "sudo wg show {$this->device}";
+        $output = trim(shell_exec($cmd));
+        $output = explode("\n", $output);
+        $interfaceOnly = array_slice($output, 0, 4);
+        $peersOnly = array_slice($output, 5);
+        $interfaces = array();
+        $peers = array();
+        $peerCount = -1;
+        foreach($interfaceOnly as $value) {
+            $value = trim($value);
+            $data = explode(':', $value);
+            $interfaces[trim($data[0])] = trim($data[1]);
+        }
+
+        foreach($peersOnly as $value) {
+            $value = trim($value);
+            if (strlen($value) > 0) {
+                if (stringStart($value, 'peer')) {
+                    $peerCount++;
+                }
+                $data = explode(':', $value);
+                $peers[$peerCount][trim($data[0])] = trim($data[1]);
+            }
+        }
+        return [
+            'interface' => $interfaces,
+            'peers' => $peers
+        ];
     }
 }
