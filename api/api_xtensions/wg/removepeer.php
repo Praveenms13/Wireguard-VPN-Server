@@ -7,7 +7,7 @@ try {
                 if (isset($this->_request['publickey'])) {
                     $wg = new wireguard("wg0");
                     $data = [
-                        "User" => $wg->getPeer($this->_request['publickey'])
+                        "Result" => $wg->removePeer($this->_request['publickey'])
                     ];
                     $this->response($this->json($data), 201);
                 } else {
