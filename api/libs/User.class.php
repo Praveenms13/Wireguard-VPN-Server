@@ -5,12 +5,15 @@ class User
 {
     private $db;
     private $user;
+    private $username;
+    private $users_table;
 
     public function __construct($username)
     {
         $this->db = Database::getConnection();
+        $this->users_table = Database::getCurrentDB()[0];
         $this->username = $username;
-        $query = "SELECT * FROM `API` WHERE `username` = '$this->username' OR `email_address` = '$this->username'";
+        $query = "SELECT * FROM `$this->users_table` WHERE `username` = '$this->username' OR `email_address` = '$this->username'";
         $result = $this->db->query($query);
         if ($result->num_rows > 0) {
             $this->user = $result->fetch_assoc();

@@ -25,4 +25,13 @@ class Database
             return Database::$connection;
         }
     }
+
+    public static function getCurrentDB()
+    {
+        $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../env.json");
+        $config = json_decode($config, true);
+        $users = $config["users_table"];
+        $user_session = $config["users_session_table"];
+        return array($users,$user_session);
+    }
 }

@@ -1,4 +1,5 @@
 <?php
+
 require_once("REST.api.php");
 require_once("libs/Database.class.php");
 require_once("libs/Signup.class.php");
@@ -49,7 +50,8 @@ class API extends REST
             "Error" => $e->getMessage(),
         ];
         $response_code = 400;
-        if ($e->getMessage() == ("Notes Not Found" or
+        if ($e->getMessage() == (
+            "Notes Not Found" or
             "Folder Not Found" or
             "Created at Not Found" or
             "Updated at Not Found" or
@@ -67,7 +69,7 @@ class API extends REST
     public function processApi()
     {
         //ALERT!!...   to prevent the sql injection here
-        $func = strtolower(trim(str_replace("", "", $_REQUEST['method']))); // TODO: If api doesnt works remove / from the line 
+        $func = strtolower(trim(str_replace("", "", $_REQUEST['method']))); // TODO: If api doesnt works remove / from the line
         if ((int)method_exists($this, $func) > 0) {
             $this->$func();
         } else {

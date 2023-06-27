@@ -10,9 +10,12 @@ class Auth  //OAuth can be used to generate new access tokens
     public $oauth;
     public $oauth_token;
     private $Token = null;
+    private $password;
+    private $users_table;
     public function __construct($username, $password = null)
     {
         $this->db = Database::getConnection();
+        $this->users_table = Database::getCurrentDB()[0];
         if ($password == null) {
             $this->isAuthToken = true;
             $this->Token = $username;
@@ -25,7 +28,7 @@ class Auth  //OAuth can be used to generate new access tokens
 
         if ($this->isAuthToken) {
             $this->oauth_token = new OAuth($this->Token);
-            $this->oauth_token->authenticate(); 
+            $this->oauth_token->authenticate();
         } elseif (!$this->isAuthToken) {
             $user = new User($this->username);
             $this->username = $user->getName();
@@ -70,7 +73,7 @@ class Auth  //OAuth can be used to generate new access tokens
 
     private function isActive()
     {
-        $query = "SELECT * FROM `API` WHERE `username` = '$this->username'";
+        $query = "SELECT * FROM `$this->users_table` WHERE `username` = '$this->username'";
         $result = $this->db->query($query);
         if ($result->num_rows > 0) {
             $user = $result->fetch_assoc();

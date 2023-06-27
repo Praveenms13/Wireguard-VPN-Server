@@ -1,5 +1,4 @@
 <?php
-
 $FunCall = new REST();
 $token = $FunCall->cleanInputs($_GET['token']);
 try {

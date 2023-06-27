@@ -4,7 +4,7 @@ ${basename(__FILE__, ".php")} = function () {
     if ($this->get_request_method() == "POST") {
         if ($this->isAuthenticated()) {
             try {
-                $username = $this->IgetUsername();
+                $username = $this->getUsername();
                 $data = [
                     "User" => $username,
                     "Status" => "Authenticated :)"

@@ -8,7 +8,8 @@ ${basename(__FILE__, ".php")} = function () {
             $password = $this->_request['password'];
             if ($_SERVER['REMOTE_ADDR']!='122.165.70.136') {
                 $data = [
-                    "Status" => "Forbidden, Signup not allowed from this IP"
+                    "Status" => "Forbidden, Signup not allowed from this IP",
+                    "IP" => $_SERVER['REMOTE_ADDR']
                 ];
                 $this->response($this->json($data), 403);
             }
