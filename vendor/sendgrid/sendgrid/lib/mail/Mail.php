@@ -1756,7 +1756,8 @@ class Mail implements \JsonSerializable
     /**
      * Disable sandbox mode on a MailSettings object
      *
-     * This to ensure that your request is not in sandbox mode.
+     * This allows you to send a test email to ensure that your request
+     * body is valid and formatted correctly.
      *
      * @throws TypeException
      */

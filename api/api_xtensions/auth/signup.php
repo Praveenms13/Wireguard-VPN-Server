@@ -18,7 +18,7 @@ ${basename(__FILE__, ".php")} = function () {
                     "ID" => $newObj->InsertID(),
                     "Username" => $this->_request['username'],
                     "Email" => $this->_request['email'],
-                    "Status" => "Login Success, Please Verify your Email :)"
+                    "Status" => "Signup Success, Please Verify your Email to Login:)"
                 ];
                 $this->response($this->json($data), 200);
             } catch (Exception $e) {

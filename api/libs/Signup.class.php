@@ -1,6 +1,6 @@
 <?php
 
-require_once realpath(dirname(__FILE__)) . '/../../vendor/autoload.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/vendor/autoload.php';
 class Signup
 {
     private $username;
@@ -36,7 +36,7 @@ class Signup
         $result = $db->query($query);
         if ($result->num_rows > 0) {
             return true;
-        } else { 
+        } else {
             return false;
         }
     }
@@ -83,36 +83,28 @@ class Signup
     }
 
 
-    private function sendverificationEmail($email, $token)
+    private function sendverificationEmail($email_account, $token)
     {
         try {
-            $config = file_get_contents(realpath(dirname(__FILE__)) . "/../../../env.json");
+            $config = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../env.json");
             $config = json_decode($config, true);
             $sendgrid_api_key = $config['sendgrid_api_key'];
             $email = new \SendGrid\Mail\Mail();
-            $email->setFrom("mspraveenkumar77@gmail.com", "Example User");
-            $email->setSubject("Sending with SendGrid is Fun");
-            $email->addTo("mspreetha12@gmail.com", "Example User");
-            $email->addContent("text/plain", "and easy to do anywhere, even with PHP");
-            $email->addContent(
-                "text/html",
-                "<strong>and easy to do anywhere, even with PHP</strong>"
-            );
+            $email->setFrom("mspraveenkumar77@gmail.com", "VPN App");
+            $email->setSubject("Verify Your Email !");
+            $email->addTo($email_account, "VPN App");
+            $email->addContent("text/plain", "Your Token is: $token");
             $sendgrid = new \SendGrid($sendgrid_api_key);
             $response = $sendgrid->send($email);
-            if ($response->statusCode() == 202) {
+            $statusCode = $response->statusCode();
+            if ($statusCode == 202) {
                 return true;
             } else {
                 return false;
             }
-            // print $response->statusCode() . "\n";
-            // print_r($response->headers());
-            // print $response->body() . "\n";
         } catch (Exception $e) {
-            throw new Exception("Unable to send verification email(verification())");
-            echo 'Caught exception: '. $e->getMessage() ."\n";
+            throw new Exception("Unable to send verification email, Error: " . $e->getMessage());
         }
-
     }
 
 

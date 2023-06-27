@@ -7,7 +7,7 @@ To make a pull request, follow these steps:
 
 <img src="/static/img/github-sign-up.png" width="800">
 
-2. __[Fork](https://help.github.com/fork-a-repo/)__ the [sendgrid-php](https://github.com/sendgrid/sendgrid-php) repository:
+2. __[Fork](https://help.github.com/fork-a-repo/)__ the [php-http-client](https://github.com/sendgrid/php-http-client) repository:
 
 <img src="/static/img/github-fork.png" width="800">
 
@@ -15,11 +15,11 @@ To make a pull request, follow these steps:
 
 ```bash
 # Clone your fork of the repo into the current directory
-git clone https://github.com/your_username/sendgrid-php
+git clone https://github.com/your_username/php-http-client
 # Navigate to the newly cloned directory
-cd sendgrid-php
+cd php-http-client
 # Assign the original repo to a remote called "upstream"
-git remote add upstream https://github.com/sendgrid/sendgrid-php
+git remote add upstream https://github.com/sendgrid/php-http-client
 ```
 
 > Don't forget to replace *your_username* in the URL by your real GitHub username.
