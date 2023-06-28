@@ -6,6 +6,7 @@ require_once $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
 use Carbon\Carbon;
 use EllipticCurve\PublicKey;
 
+// TODO TO Make this with Regex
 class wireguard
 {
     private $db;
@@ -16,11 +17,10 @@ class wireguard
         $this->device = $device;
     }
 
-    public function addPeer($publicKey, $ip)
+    public function addPeer($publicKey)
     {
         $publicKey = str_replace(' ', '', trim($publicKey));
-        $ip = str_replace(' ', '', trim($ip));
-        // TODO TO Make this with Regex
+        $ip = '10.0.0.4/24';
         $cmd = "sudo wg set {$this->device} peer {$publicKey} allowed-ips {$ip}";
         $result = 0;
         system($cmd, $result);
@@ -30,7 +30,6 @@ class wireguard
     public function removePeer($publicKey)
     {
         $publicKey = str_replace(' ', '', trim($publicKey));
-        // TODO TO Make this with Regex
         $cmd = "sudo wg set {$this->device} peer {$publicKey} remove";
         $result = 0;
         system($cmd, $result);
@@ -40,7 +39,6 @@ class wireguard
     public function getPeer($publicKey)
     {
         $publicKey = str_replace(' ', '', trim($publicKey));
-        // TODO TO Make this with Regex
         $cmd = "sudo wg show {$this->device} | grep -A10 {$publicKey}";
         $output = trim(shell_exec($cmd));
         $output = explode("\n", $output);
@@ -66,7 +64,6 @@ class wireguard
 
     public function getPeers()
     {
-        // TODO TO Make this with Regex
         $cmd = "sudo wg show {$this->device}";
         $output = trim(shell_exec($cmd));
         $output = explode("\n", $output);

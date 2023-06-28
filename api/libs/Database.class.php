@@ -1,8 +1,40 @@
 <?php
 
+require_once $_SERVER['DOCUMENT_ROOT'] . "/vendor/autoload.php";
 class Database
 {
     public static $connection = null;
+    public $mongoClient = null;
+    //-----------------MongoDB-Starts----------------------------------------
+    public function __construct()
+    {
+        if (!extension_loaded('mysqli')) {
+            throw new Exception("Mysqli extension not loaded");
+        }
+        if (!extension_loaded('json')) {
+            throw new Exception("Json extension not loaded");
+        }
+        if (!extension_loaded('mongodb')) {
+            throw new Exception("Mongodb extension not loaded");
+        }
+        $this->mongoClient = new MongoDB\Client("mongodb://127.0.0.1:27017");
+        if (!$this->mongoClient) {
+            http_response_code(500);
+            throw new Exception("MongoDB connection failed");
+        }
+    }
+
+    public function getMongoClient($db)
+    {
+        return $this->mongoClient->$db;
+    }
+
+    public function getArray($val)
+    {
+        return json_decode(json_encode($val), JSON_PRETTY_PRINT);
+    }
+    //-----------------MongoDB-Ends----------------------------------------
+    //-----------------MySQL-Starts----------------------------------------
     public static function getConnection()
     {
         if (Database::$connection == null) {
@@ -34,4 +66,5 @@ class Database
         $user_session = $config["users_session_table"];
         return array($users,$user_session);
     }
+    //-----------------MySQL-Ends----------------------------------------
 }
