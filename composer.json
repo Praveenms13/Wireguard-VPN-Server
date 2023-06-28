@@ -1,6 +1,7 @@
 {
     "require": {
         "sendgrid/sendgrid": "8.0",
-        "nesbot/carbon": "^2.67"
+        "nesbot/carbon": "^2.67",
+        "mongodb/mongodb": "^1.15"
     }
 }

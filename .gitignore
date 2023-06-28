@@ -1,11 +1,11 @@
 # Ignored Files
 
-# api/libs/Auth.class.php
+vendor/
 
-# api/libs/OAuth.class.php
+api/libs/Auth.class.php
 
-# api/REST.api.php
+api/libs/OAuth.class.php
 
-# REST_API_Framework/
+api/REST.api.php
 
-# mail.php
+REST_API_Framework/
