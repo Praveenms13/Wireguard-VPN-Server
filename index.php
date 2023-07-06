@@ -79,7 +79,8 @@
 <body>
 <h1 class="block-effect" style="--td: 2s">
         <div class="block-reveal" style="--bc: #B9A92C; --d: .1s">VPN</div>
-        <div class="block-reveal" style="--bc: #FF5722; --d: .5s">Dashboard Under Development</div>
+        <div class="block-reveal" style="--bc: #B9A92C; --d: .1s">Dashboard</div>
+        <div class="block-reveal" style="--bc: #FF5722; --d: .5s">Under Development</div>
     </h1>
 </body>
 </html>
