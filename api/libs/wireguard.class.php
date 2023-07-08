@@ -53,11 +53,13 @@ class wireguard
 
     public function removePeer($publicKey)
     {
+        $ipnet = new IPNetwork($this->getCIDR(), $this->device);
         $publicKey = str_replace(' ', '', trim($publicKey));
         $cmd = "sudo wg set {$this->device} peer {$publicKey} remove";
-        $result = 0;
         system($cmd, $result);
-        return $result == 0 ? true : false;
+        if ($result == 0) {
+            return $ipnet->deallocateIP($publicKey);
+        }
     }
 
     public function getPeer($publicKey)

@@ -121,4 +121,14 @@ class IPNetwork
         $result = $this->collection->Networks->updateOne(['ip' => $ip, 'wgdevice' => $this->device], ['$set' => ['allocated' => true, 'owner' => $email, 'public_key' => $public_key, 'allocated_time' => time()]]);
         return $ip;
     }
+
+    public function deallocateIP($public_key)
+    {
+        $result = $this->collection->Networks->updateOne(['public_key' => $public_key, 'wgdevice' => $this->device], ['$set' => ['allocated' => false, 'owner' => '', 'public_key' => '', 'allocated_time' => '']]);
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
