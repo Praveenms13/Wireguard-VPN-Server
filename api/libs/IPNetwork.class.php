@@ -14,14 +14,19 @@ class IPNetwork
     private $db;
     private $collection;
     private $network;
-    public function __construct($cidr = null)
+    private $device;
+    public function __construct($cidr = null, $device = null)
     {
         if ($cidr == null) {
             throw new Exception("CIDR is null");
         }
+        if ($device == null) {
+            throw new Exception("Device is null");
+        }
         $this->db = new Database();
         $this->collection = $this->db->getMongoClient('VPN');
         $this->cidr = $cidr;
+        $this->device = $device;
         $this->network = $this->getNetwork();
     }
 
@@ -63,24 +68,40 @@ class IPNetwork
                     '_id' => $id++,
                     'cidr' => $this->cidr,
                     'ip' => $data,
+                    'wgdevice' => $this->device,
                     'allocated' => false,
                     'owner' => '',
                     'created_time' => time(),
                     'allocated_time' => '',
                     'public_key' => '',
-                    'private_key' => '',
-                    'allowed_ips' => '',
-                    'endpoint' => '',
-                    'persistent_keepalive' => '',
-                    'status' => 'offline',
-                    'last_seen' => '',
-                    'last_handshake' => '',
+                    'private_key' => ''
                 ];
                 array_push($documents, $val);
             }try {
-                $result = $this->collection->IP_Addrs->insertMany($documents);
+                $result = $this->collection->Networks->insertMany($documents);
+                if ($result) {
+                    $a = "Network Synced Successfully, " . $result->getInsertedCount() . " IP Addresses Inserted." . " Created Time : " . date("Y-m-d H:i:s", $documents[0]['created_time']);
+                    $keys = [
+                        'public_key' => 'text',
+                        'private_key' => 'text'
+                    ];
+
+                    $options = [
+                        'unique' => true
+                    ];
+                    $unique = $this->collection->Networks->createIndex($keys, $options);
+                    if ($unique) {
+                        $a = $a . ". Unique Index Created Successfully";
+                        return $a;
+                    } else {
+                        $a = $a . ". Alert!! Unique Index Creation Failed";
+                        throw new Exception($a);
+                    }
+                } else {
+                    throw new Exception("Network Sync Failed");
+                }
             } catch (Exception $e) {
-                print("Network Already Synced");
+                throw new Exception("Network Already Synced");
             }
             return $result;
         } else {
@@ -91,12 +112,14 @@ class IPNetwork
 
     public function getnextIP()
     {
-
+        $result = $this->collection->Networks->findone(['wgdevice' => $this->device, 'allocated' => false], ["sort" => ['_id' => 1]]);
+        return $result['ip'];
     }
 
-    public function allocateIP($ip, $email, $public_key, $private_key, $allowed_ips, $endpoint, $persistent_keepalive, $last_seen, $last_handshake)
+    public function allocateIP($ip, $email, $public_key)
     {
-
+        $result = $this->collection->Networks->updateOne(['ip' => $ip, 'wgdevice' => $this->device], ['$set' => ['allocated' => true, 'owner' => $email, 'public_key' => $public_key, 'allocated_time' => time()]]);
+        return $ip;
     }
 
     public function generateIPfromCIDR()

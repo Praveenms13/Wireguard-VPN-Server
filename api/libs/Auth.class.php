@@ -1,6 +1,7 @@
 <?php
 
 require_once "Database.class.php";
+
 class Auth  //OAuth can be used to generate new access tokens
 {
     private $db;

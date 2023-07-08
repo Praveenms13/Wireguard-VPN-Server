@@ -4,10 +4,11 @@ try {
     ${basename(__FILE__, ".php")} = function () {
         if ($this->get_request_method() == "POST") {
             if ($this->isAuthenticated()) {
-                if (isset($this->_request['publickey'])) {
+                if (isset($this->_request['publickey']) and isset($this->_request['email'])) {
                     $wg = new wireguard("wg0");
                     $data = [
-                        "Result" => $wg->addPeer($this->_request['publickey'], '10.0.0.4')
+                        "Result" => "Success",
+                        "Your VPN IP" => $wg->addPeer($this->_request['publickey'], $this->_request['email'])
                     ];
                     $this->response($this->json($data), 201);
                 } else {

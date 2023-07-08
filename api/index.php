@@ -7,6 +7,7 @@ require_once("libs/User.class.php");
 require_once("libs/Auth.class.php");
 require_once("libs/OAuth.class.php");
 require_once("libs/wireguard.class.php");
+require_once("libs/IPNetwork.class.php");
 class API extends REST
 {
     private $current_call;

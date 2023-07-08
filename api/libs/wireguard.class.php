@@ -10,21 +10,45 @@ use EllipticCurve\PublicKey;
 class wireguard
 {
     private $db;
-    private $device;
+    public $device;
     public function __construct($device)
     {
         $this->db = Database::getConnection();
         $this->device = $device;
     }
 
-    public function addPeer($publicKey)
+    public function getCIDR()
+    {
+        $cmd = "ip addr show dev wg0 | grep -w inet | awk '{print $2}'";
+        $cmd = trim(shell_exec($cmd));
+        return $cmd;
+    }
+    public function syncNetwork()
+    {
+        $ipnet = new IPNetwork($this->getCIDR(), $this->device);
+        return $ipnet->syncNetworkFile();
+    }
+
+    public function addPeer($publicKey, $email)
     {
         $publicKey = str_replace(' ', '', trim($publicKey));
-        $ip = '10.0.0.4/24';
-        $cmd = "sudo wg set {$this->device} peer {$publicKey} allowed-ips {$ip}";
-        $result = 0;
-        system($cmd, $result);
-        return $result == 0 ? true : false;
+        $email = str_replace(' ', '', trim($email));
+        $ipnet = new IPNetwork($this->getCIDR(), $this->device);
+        $nextIP = $ipnet->getNextIP();
+        $checkCmd = "sudo wg show " . trim($this->device) . " | grep " . trim($nextIP);
+        $pattern = '/allowed ips: (' . preg_quote($nextIP, '/') . ')/';
+        if (preg_match($pattern, exec($checkCmd))) {
+            throw new Exception("IP Already Present, cannot add more than one peer with same IP");
+        } else {
+            $cmd = "sudo wg set {$this->device} peer {$publicKey} allowed-ips {$nextIP}";
+            $result = 0;
+            system($cmd, $result);
+            if ($result == 0) {
+                return $ipnet->allocateIP($nextIP, $email, $publicKey);
+            } else {
+                throw new Exception("Error Adding Peer");
+            }
+        }
     }
 
     public function removePeer($publicKey)
