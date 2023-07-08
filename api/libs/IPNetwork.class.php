@@ -121,19 +121,4 @@ class IPNetwork
         $result = $this->collection->Networks->updateOne(['ip' => $ip, 'wgdevice' => $this->device], ['$set' => ['allocated' => true, 'owner' => $email, 'public_key' => $public_key, 'allocated_time' => time()]]);
         return $ip;
     }
-
-    public function generateIPfromCIDR()
-    {
-
-    }
-
-    public function getIP()
-    {
-
-    }
-
-    public function getUser()
-    {
-
-    }
 }

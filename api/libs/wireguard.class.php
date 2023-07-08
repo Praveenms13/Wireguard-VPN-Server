@@ -38,7 +38,7 @@ class wireguard
         $checkCmd = "sudo wg show " . trim($this->device) . " | grep " . trim($nextIP);
         $pattern = '/allowed ips: (' . preg_quote($nextIP, '/') . ')/';
         if (preg_match($pattern, exec($checkCmd))) {
-            throw new Exception("IP Already Present, cannot add more than one peer with same IP");
+            throw new Exception("IP or Peer Already Present, cannot add more than one peer with same IP");
         } else {
             $cmd = "sudo wg set {$this->device} peer {$publicKey} allowed-ips {$nextIP}";
             $result = 0;
