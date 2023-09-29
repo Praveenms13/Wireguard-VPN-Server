@@ -36,7 +36,7 @@ class Signup
         //--------------------------------------------------
         $query = "SELECT * FROM `API` WHERE `username` = '$username'";
         $result = $db->query($query);
-        if ($result->num_rows > 0) {
+        if ($result->num_rows > 0) { 
             return true;
         } else {
             return false;

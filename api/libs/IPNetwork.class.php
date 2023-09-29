@@ -44,7 +44,7 @@ class IPNetwork
     {
         $file_name = str_replace('.', '_', $this->cidr);
         $file_name = str_replace('/', '_', $file_name) . ".txt";
-        $ip_file = $_SERVER['DOCUMENT_ROOT'] . "api/networks/" . $file_name;
+        $ip_file = $_SERVER['DOCUMENT_ROOT'] . "/api/networks/" . $file_name;
         return $ip_file;
     }
 
