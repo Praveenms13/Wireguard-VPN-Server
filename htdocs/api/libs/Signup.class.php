@@ -15,7 +15,7 @@ class Signup
     {
         $this->db = Database::getConnection();
         //--------------------------------------------------
-        $this->username = $username;   
+        $this->username = $username;
         $this->email = $email;
         $this->password = $this->gen_pass_hash($password);
         $this->token = $this->gen_token();
@@ -34,9 +34,9 @@ class Signup
         //--------------------------------------------------
         $username = $this->username;
         //--------------------------------------------------
-        $query = "SELECT * FROM `API` WHERE `username` = '$username'";
+        $query = "SELECT * FROM $this->users_table WHERE `username` = '$username'";
         $result = $db->query($query);
-        if ($result->num_rows > 0) { 
+        if ($result->num_rows > 0) {
             return true;
         } else {
             return false;
@@ -82,34 +82,48 @@ class Signup
     }
     private function sendverificationEmail($email_account, $token)
     {
-        try {
-            $config = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../env.json");
-            $config = json_decode($config, true);
-            $sendgrid_api_key = $config['sendgrid_api_key'];
-            $email = new \SendGrid\Mail\Mail();
-            $email->setFrom("mspraveenkumar77@gmail.com", "VPN App");
-            $email->setSubject("Verify Your Email !");
-            $email->addTo($email_account, "VPN App");
-            $email->addContent(
-                "text/html",
-                "<body>
-                <div class='card'>
-                    <h1>Hii, $this->username</h1>
-                    <p>Please verify your email by clicking the link below:</p>
-                    <a href='https://vpn.praveenms.tech/api/verify?token=$token'>Verify Email</a>
-                </div>
-            </body>"
-            );
-            $sendgrid = new \SendGrid($sendgrid_api_key);
-            $response = $sendgrid->send($email);
-            $statusCode = $response->statusCode();
-            if ($statusCode == 202) {
+        if (isset($email_account) and isset($token)) {
+            $SecureAPIKey = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../env.json");
+            $SecureAPIKey = json_decode($SecureAPIKey, true);
+            $SecureAPIKey = $SecureAPIKey['token'];
+            $curl = curl_init();
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://sendemailapi.praveenms.site/api/sendmail/mail',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'POST',
+                CURLOPT_POSTFIELDS => array(
+                    'request_method' => 'verification',
+                    'torecieve' => $email_account,
+                    'username' => $this->username,
+                    'subject' => 'Verify Your Email !',
+                    'link' => "https://vpn.praveenms.tech/api/verify?token=$token"
+                ),
+                CURLOPT_HTTPHEADER => array(
+                    'Authorization: Bearer ' . $SecureAPIKey
+                ),
+            ));
+            curl_exec($curl);
+            curl_close($curl);
+            $httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            if ($httpStatus == 200) {
                 return true;
             } else {
-                return false;
+                $users_table = $this->users_table;
+                $query = "DELETE FROM `$users_table` WHERE `id` = '$this->id'";
+                $result = $this->db->query($query);
+                if ($result) {
+                    throw new Exception("Unable to send verification email, please try again");
+                } else {
+                    throw new Exception("Unable to send verification email and unable to delete the user, please try again");
+                }
             }
-        } catch (Exception $e) {
-            throw new Exception("Unable to send verification email, Error: " . $e->getMessage());
+        } else {
+            throw new Exception("Email or Token not set");
         }
     }
 

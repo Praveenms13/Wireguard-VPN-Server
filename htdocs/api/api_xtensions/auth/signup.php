@@ -6,7 +6,7 @@ ${basename(__FILE__, ".php")} = function () {
             $username = $this->_request['username'];
             $email = $this->_request['email'];
             $password = $this->_request['password'];
-            if ($_SERVER['REMOTE_ADDR']!='49.37.214.145') {
+            if ($_SERVER['REMOTE_ADDR'] != '122.165.78.86' and $_SERVER['REMOTE_ADDR'] != '34.142.211.123') {
                 $data = [
                     "Status" => "Forbidden, Signup not allowed from this IP",
                     "IP" => $_SERVER['REMOTE_ADDR']
@@ -24,7 +24,7 @@ ${basename(__FILE__, ".php")} = function () {
                 $this->response($this->json($data), 200);
             } catch (Exception $e) {
                 $data = [
-                    "Status" => "Failed",
+                    "Status" => "Failed !!!!",
                     "Error" => $e->getMessage()
                 ];
                 $this->response($this->json($data), 417);
