@@ -1,0 +1,8 @@
+www-data can be access wg without sudo password (VISUDO)
+www-data can create network file without any permission
+To make isAuthenticated() work
+Supports only IPV4
+To Change with REGEX to validate CIDR IF Possible
+To Filter Nmap Commands to Prevent Command Injection
+Mongodb, mysql, reddis running in localhost
+To make filter all with regex for faster execution

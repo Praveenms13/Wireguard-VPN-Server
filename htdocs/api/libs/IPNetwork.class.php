@@ -101,7 +101,7 @@ class IPNetwork
                     throw new Exception("Network Sync Failed");
                 }
             } catch (Exception $e) {
-                throw new Exception("Network Already Synced");
+                throw new Exception("Network Already Synced: " . $e->getMessage());
             }
             return $result;
         } else {
