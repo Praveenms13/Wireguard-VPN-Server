@@ -115,7 +115,13 @@ class Signup
         $response = curl_exec($curl);
 
         if (curl_errno($curl)) {
-            throw new Exception("cURL Error: " . curl_error($curl));
+            $query = "DELETE FROM `$this->users_table` WHERE `username` = '$this->username'";
+            $result = $this->db->query($query);
+            if ($result) {
+                throw new Exception("Please try again later. cURL Error: " . curl_error($curl));
+            } else {
+                throw new Exception("Please try again later. cURL Error: " . curl_error($curl));
+            }
         }
 
         $httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
