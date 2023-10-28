@@ -6,7 +6,7 @@ ${basename(__FILE__, ".php")} = function () {
             $username = $this->_request['username'];
             $email = $this->_request['email'];
             $password = $this->_request['password'];
-            if ($_SERVER['REMOTE_ADDR'] != '122.165.78.86' and $_SERVER['REMOTE_ADDR'] != '34.142.211.123') {
+            if ($_SERVER['REMOTE_ADDR'] != '49.207.58.244' and $_SERVER['REMOTE_ADDR'] != '106.51.76.75' and $_SERVER['REMOTE_ADDR'] != "122.165.78.86") {
                 $data = [
                     "Status" => "Forbidden, Signup not allowed from this IP",
                     "IP" => $_SERVER['REMOTE_ADDR']

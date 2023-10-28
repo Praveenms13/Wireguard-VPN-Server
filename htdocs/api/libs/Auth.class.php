@@ -56,7 +56,6 @@ class Auth  //OAuth can be used to generate new access tokens
 
     public function getUsername()
     {
-        echo "hey me";
         if ($this->oauth_token->authenticate()) {
             return $this->oauth_token->getUsername();
         } elseif (!$this->oauth_token->authenticate()) {

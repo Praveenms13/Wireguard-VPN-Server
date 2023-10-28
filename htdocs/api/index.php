@@ -29,7 +29,9 @@ class API extends REST
     {
         if (isset(getallheaders()['Authorization'])) {
             $token = explode(" ", getallheaders()['Authorization'])[1];
-            $this->auth = new Auth($token);
+            if (explode(" ", getallheaders()['Authorization'])[0] != "Bearer") {
+                $this->auth = new Auth($token);
+            }
         }
     }
 
@@ -52,8 +54,7 @@ class API extends REST
             "Error" => $e->getMessage(),
         ];
         $response_code = 400;
-        if ($e->getMessage() == (
-            "Notes Not Found" or
+        if ($e->getMessage() == ("Notes Not Found" or
             "Folder Not Found" or
             "Created at Not Found" or
             "Updated at Not Found" or

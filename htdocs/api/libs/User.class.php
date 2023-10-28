@@ -17,8 +17,6 @@ class User
         $result = $this->db->query($query);
         if ($result->num_rows > 0) {
             $this->user = $result->fetch_assoc();
-        } else {
-            throw new Exception("User not found......");
         }
     }
 

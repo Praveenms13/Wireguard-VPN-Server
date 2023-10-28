@@ -80,53 +80,59 @@ class Signup
         $hash = password_hash($password, PASSWORD_BCRYPT, $cost_amount);
         return $hash;
     }
-    private function sendverificationEmail($email_account, $token)
+    private function sendVerificationEmail($email_account, $token)
     {
-        if (isset($email_account) and isset($token)) {
-            $SecureAPIKey = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../env.json");
-            $SecureAPIKey = json_decode($SecureAPIKey, true);
-            $SecureAPIKey = $SecureAPIKey['token'];
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://sendemailapi.praveenms.site/api/sendmail/mail',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => array(
-                    'request_method' => 'verification',
-                    'torecieve' => $email_account,
-                    'username' => $this->username,
-                    'subject' => 'Verify Your Email !',
-                    'link' => "https://vpn.praveenms.tech/api/verify?token=$token"
-                ),
-                CURLOPT_HTTPHEADER => array(
-                    'Authorization: Bearer ' . $SecureAPIKey
-                ),
-            ));
-            curl_exec($curl);
-            curl_close($curl);
-            $httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            if ($httpStatus == 200) {
-                return true;
-            } else {
-                $users_table = $this->users_table;
-                $query = "DELETE FROM `$users_table` WHERE `id` = '$this->id'";
-                $result = $this->db->query($query);
-                if ($result) {
-                    throw new Exception("Unable to send verification email, please try again");
-                } else {
-                    throw new Exception("Unable to send verification email and unable to delete the user, please try again");
-                }
-            }
-        } else {
+        if (!isset($email_account) || !isset($token)) {
             throw new Exception("Email or Token not set");
         }
-    }
 
+        $SecureAPIKey = file_get_contents($_SERVER['DOCUMENT_ROOT'] . "/../env.json");
+        $SecureAPIKey = json_decode($SecureAPIKey, true);
+        $SecureAPIKey = $SecureAPIKey['token'];
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://sendemailapi.praveenms.site/api/sendmail/mail',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => http_build_query(array(
+                'request_method' => 'verification',
+                'torecieve' => $email_account,
+                'username' => $this->username,
+                'subject' => 'Verify Your Email !',
+                'link' => "https://vpn.praveenms.tech/api/verify?token=$token"
+            )),
+            CURLOPT_HTTPHEADER => array(
+                'Authorization: Bearer ' . $SecureAPIKey
+            ),
+        ));
+
+        $response = curl_exec($curl);
+
+        if (curl_errno($curl)) {
+            throw new Exception("cURL Error: " . curl_error($curl));
+        }
+
+        $httpStatus = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+
+        if ($httpStatus == 200) {
+            return true;
+        } else {
+            $query = "DELETE FROM `$this->users_table` WHERE `username` = '$this->username'";
+            $result = $this->db->query($query);
+            if ($result) {
+                throw new Exception("Unable to send verification email and deleted the user, Please try again later. httpsstatus: $httpStatus");
+            } else {
+                throw new Exception("Unable to send verification email, Please try again later");
+            }
+        }
+    }
 
 
     public static function verifyEmail($token)
